@@ -1,0 +1,13 @@
+{
+  "daily_question_time": "12:00",
+  "prefix": "!",
+  "problem_difficulties": {
+    "easy": true,
+    "medium": true,
+    "hard": true
+  },
+  "TOKEN": "MTEwMzIyMjA2MTk1MTg4MTIyNg.GwfFrg.9vHR8LzcjHPEOwFvkk9GjGC-Wh3RNp3YRq6qkA",
+  // TODO: replace with your own leetcode session cookie and csrf token
+  "leetcode_session": "your leetcode session cookie",
+  "csrf_token": "your csrf token"
+}
