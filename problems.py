@@ -1,4 +1,5 @@
 import random
+import json
 import leetcode
 
 def init_leetcode_api(leetcode_session, csrf_token):
@@ -12,22 +13,69 @@ def init_leetcode_api(leetcode_session, csrf_token):
     api = leetcode.DefaultApi(leetcode.ApiClient(configuration))
     return api
 
-def get_random_unsolved_question(api):
+def get_random_unsolved_questions(api, difficulties):
     # Fetch the list of problems
-    api_response = api.api_problems_topic_get(topic="algorithms") # TODO: what other topics are there?
+    api_response = api.api_problems_topic_get(topic="algorithms")
 
-    # Filter the problems you haven't solved yet
+    # Filter out the problems that have been solved already
     unsolved_problems = [
         pair for pair in api_response.stat_status_pairs if pair.status != "ac"
     ]
 
-    # Choose a random unsolved problem
-    random_problem = random.choice(unsolved_problems)
+    # For converting the difficulty level to a number, which leetcode uses
+    levels = {'Easy': 1, 'Medium': 2, 'Hard': 3}
 
-    # Get problem details
-    problem_title = random_problem.stat.question__title
-    problem_url = f"https://leetcode.com/problems/{random_problem.stat.question__title_slug}/"
+    selected_problems = {}
+    for difficulty in difficulties:
+        level = levels[difficulty]
+        for problem in unsolved_problems[:5]:
+            # debug by printing out the problem difficulty
+            print(f"Problem {problem.stat.frontend_question_id} has level {problem.difficulty.level}")
 
-    print(problem_title, problem_url)
-    # TODO: what to return?
-    return problem_title, problem_url
+        # Filter the problems you haven't solved yet for the current difficulty
+        diff_problems = [
+            problem for problem in unsolved_problems
+            if problem.status != "ac" and problem.difficulty.level == level
+        ]
+
+        if diff_problems:
+            # Choose a random unsolved problem for the current difficulty
+            random_problem = random.choice(unsolved_problems)
+
+            # Get problem details
+            problem_id = random_problem.stat.frontend_question_id
+            problem_title = random_problem.stat.question__title
+            problem_url = f"https://leetcode.com/problems/{random_problem.stat.question__title_slug}/"
+            acceptance_rate = round(random_problem.stat.total_acs / random_problem.stat.total_submitted * 100, 2)
+
+            # Add the problem information to the selected_problems dictionary
+            selected_problems[difficulty] = {
+                "id": problem_id,
+                "title": problem_title,
+                "url": problem_url,
+                "acceptance_rate": acceptance_rate
+            }
+
+    return selected_problems
+
+# TODO: keep the problem_id, title, and difficulty in the database
+def get_problem_by_id(api, problem_id):
+    query = """
+    {
+        problems: allQuestions {
+            title
+            questionId
+            difficulty
+        }
+    }
+    """
+
+    body = leetcode.GraphqlQuery(query=query)
+    response = api.graphql_post(body=body)
+
+    problems = json.loads(response.to_str())['data']['problems']
+    for problem in problems:
+        if int(problem['questionId']) == problem_id:
+            return problem
+
+    return None
