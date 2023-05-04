@@ -27,24 +27,26 @@ cd leetcode-discord-bot
 pip install -r requirements.txt
 ```
 2. Create a Discord bot and obtain its token. Follow the instructions in the Discord Developer Portal.
-3. Configure the config.json file with your bot token, command prefix, LeetCode session, and CSRF token. Optionally, you can also customize the problem difficulties.
+3. Set the DISCORD_BOT_TOKEN environment variable with the bot token you obtained in step 2:
+```bash
+export DISCORD_BOT_TOKEN=your_discord_bot_token_here
+```
+4. Configure the config.json file with your command prefix, LeetCode session, and CSRF token. Optionally, you can also customize the problem difficulties.
 
 ```json
-Copy code
 {
-  "TOKEN": "your_bot_token_here",
   "prefix": "!",
-  "leetcode_session": "your_leetcode_session_here",
-  "csrf_token": "your_csrf_token_here",
   "problem_difficulties": {
     "easy": true,
     "medium": true,
     "hard": true
   }
+  "leetcode_session": "your_leetcode_session_here",
+  "csrf_token": "your_csrf_token_here",
 }
 ```
-4. Invite the bot to your Discord server by following the instructions in the Discord Developer Portal.
-5. Run the bot:
+5. Invite the bot to your Discord server by following the instructions in the Discord Developer Portal.
+6. Run the bot:
 ```bash
 python main.py
 ```

@@ -1,12 +1,10 @@
 {
-  "daily_question_time": "12:00",
   "prefix": "!",
   "problem_difficulties": {
 	"easy": true,
 	"medium": true,
 	"hard": true
   },
-  "TOKEN": "MTEwMzIyMjA2MTk1MTg4MTIyNg.GwfFrg.9vHR8LzcjHPEOwFvkk9GjGC-Wh3RNp3YRq6qkA",
   "leetcode_session": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfYXV0aF91c2VyX2lkIjoiMzc4NTgzNyIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiOGU0ZDI4NDcyZDM5ZDUxYTc4YTkzMGI2MDY5MzVjNDUxYjg1ODNkNyIsImlkIjozNzg1ODM3LCJlbWFpbCI6ImtuaXBld2lsbGlhbTIwQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoid2hpbXNpY2FsIiwidXNlcl9zbHVnIjoid2hpbXNpY2FsIiwiYXZhdGFyIjoiaHR0cHM6Ly9hc3NldHMubGVldGNvZGUuY29tL3VzZXJzL2F2YXRhcnMvYXZhdGFyXzE2NjM1MjYyNzMucG5nIiwicmVmcmVzaGVkX2F0IjoxNjgzMDYxMjM4LCJpcCI6IjE2NC41Mi4yNDYuMzUiLCJpZGVudGl0eSI6ImQ5YzU0NGQwYWFkZGZkMjBjMDUxYTA4MTFmMmYzODJkIiwic2Vzc2lvbl9pZCI6Mzg4NzU4NzQsIl9zZXNzaW9uX2V4cGlyeSI6MTIwOTYwMH0.C0nLU6K7IyaY9jwNoJjvrVuGjClpNRxe-myKq7Q4rWE",
   "csrf_token": "uxEIGcjVoueJ3AS4Mv3DKvZBgvQp8SuMzAHFVNhZSSwURLbAYhnhUsBlBT26kJhw"
 }

@@ -1,6 +1,7 @@
 import json
 import discord
 import datetime
+import os
 from discord.ext import commands
 
 import problems
@@ -149,7 +150,7 @@ def run_discord_bot():
 		with open('progress.png', 'rb') as img_file:
 			await ctx.send(file=discord.File(img_file, 'progress.png'))
 
-	bot.run(config['TOKEN'])
+	bot.run(os.environ['DISCORD_BOT_TOKEN'])
 
 
 if __name__ == "__main__":
