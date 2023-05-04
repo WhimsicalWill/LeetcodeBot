@@ -35,6 +35,14 @@ def init_db(db_name="user_problems.db"):
 	);
 	""")
 
+	cursor.execute("""
+	CREATE TABLE IF NOT EXISTS daily_problems (
+		problem_id INTEGER PRIMARY KEY,
+		FOREIGN KEY (problem_id) REFERENCES leetcode_problems (problem_id)
+	);
+	""")
+
+
 	conn.commit()
 
 	return conn
@@ -48,6 +56,18 @@ def add_user_problem(db_conn, user_id, problem_id, percentile, timestamp, level)
 	with db_conn:
 		db_conn.execute("INSERT INTO user_problems (user_id, problem_id, percentile, timestamp, level) VALUES (?, ?, ?, ?, ?)", (user_id, problem_id, percentile, timestamp, level))
 
+def add_leetcode_problem(db_conn, problem_id, title, level):
+	with db_conn:
+		db_conn.execute("INSERT OR IGNORE INTO leetcode_problems (problem_id, title, level) VALUES (?, ?, ?)", (problem_id, title, level))
+
+def add_daily_problems(db_conn, problems):
+	with db_conn:
+		db_conn.execute("DELETE FROM daily_problems")
+		for problem_id in problems:
+			db_conn.execute("INSERT INTO daily_problems (problem_id) VALUES (?)", (problem_id,))
+
+	db_conn.commit()
+
 def get_problem_level_by_id(db_conn, problem_id):
 	with db_conn:
 		result = db_conn.execute("SELECT level FROM leetcode_problems WHERE problem_id = ?", (problem_id,)).fetchone()
@@ -55,9 +75,9 @@ def get_problem_level_by_id(db_conn, problem_id):
 		raise Exception(f"Problem {problem_id} not found in database")
 	return result[0]
 
-def add_leetcode_problem(db_conn, problem_id, title, level):
+def get_daily_problems(db_conn):
 	with db_conn:
-		db_conn.execute("INSERT OR IGNORE INTO leetcode_problems (problem_id, title, level) VALUES (?, ?, ?)", (problem_id, title, level))
+		return [row[0] for row in db_conn.execute("SELECT problem_id FROM daily_problems").fetchall()]
 
 def get_user_problem_counts(db_conn):
 	with db_conn:

@@ -32,6 +32,10 @@ def run_discord_bot():
 		difficulty_levels = [key.title() for key, value in config["problem_difficulties"].items() if value]
 		leet_problems = problems.get_random_unsolved_questions(leetcode_api, difficulty_levels)
 
+		# Add the problems to the daily problems table
+		daily_problems_ids = [problem_info['id'] for problem_info in leet_problems.values()]
+		data.add_daily_problems(db_conn, daily_problems_ids)
+
 		# Create an embed object
 		embed = discord.Embed(
 			title="Today's LeetCode Problems",
@@ -61,16 +65,31 @@ def run_discord_bot():
 		"""Reports the user's performance on a problem."""
 		message = ctx.message
 		try:
+			# Parse the message and make sure it's valid
 			_, problem_id, percentile = message.content.split()
+			percentile = float(percentile)
+			if percentile < 0 or percentile > 100:
+				raise Exception("Percentile should be between 0 and 100.")
+			percentile = round(percentile, 1)
+
+			# Make sure that the problem is one of today's problems
+			daily_problems = data.get_daily_problems(db_conn)
+			if int(problem_id) not in daily_problems:
+				raise Exception(f"Problem {problem_id} is not one of today's problems.")
+
+			# Get the problem level and timestamp
 			level = data.get_problem_level_by_id(db_conn, problem_id)
 			timestamp = datetime.datetime.now().date()
+
+			# Add data to the database, and send a confirmation message
 			data.add_user(db_conn, message.author.id, message.author.name)
 			data.add_user_problem(db_conn, message.author.id, int(problem_id), float(percentile), timestamp, level)
 			await message.channel.send(f"{message.author.mention} Successfully added problem {problem_id} with {percentile}% performance.")
 		except Exception as e:
 			print(f"Exception: {e}")
-			await message.channel.send(f"{message.author.mention} Invalid message. Make sure you're reporting a valid problem id.\n"
-										"Also, please use: !solved <problem_id> <percentile> (ex: !solved 1 99.9)")
+			await message.channel.send(f"{message.author.mention} Error: {str(e)}\n\n"
+										"Usage: !solved <problem_id> <percentile>\n"
+										"Ensure your problem_id is from today, and that your percentile is between 0 and 100.\n")
 
 	@bot.command(name='leaderboard')
 	async def leaderboard(ctx):
