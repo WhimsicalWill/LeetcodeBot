@@ -108,6 +108,7 @@ def run_discord_bot():
 
 	@bot.command(name='remove')
 	async def remove_score(ctx):
+		"""Remove a problem from the user's solved problems."""
 		message = ctx.message
 		try:
 			_, difficulty, *_ = message.content.split()
