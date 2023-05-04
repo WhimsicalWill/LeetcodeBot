@@ -38,13 +38,12 @@ def init_db(db_name="user_problems.db"):
 	cursor.execute("""
 	CREATE TABLE IF NOT EXISTS daily_problems (
 		problem_id INTEGER PRIMARY KEY,
+		level INTEGER NOT NULL,
 		FOREIGN KEY (problem_id) REFERENCES leetcode_problems (problem_id)
 	);
 	""")
 
-
 	conn.commit()
-
 	return conn
 
 def add_user(db_conn, user_id, username):
@@ -54,7 +53,11 @@ def add_user(db_conn, user_id, username):
 def add_user_problem(db_conn, user_id, problem_id, percentile, timestamp, level):
 	print(f"Adding user problem: {user_id}, {problem_id}, {percentile}, {timestamp}, {level}")
 	with db_conn:
-		db_conn.execute("INSERT INTO user_problems (user_id, problem_id, percentile, timestamp, level) VALUES (?, ?, ?, ?, ?)", (user_id, problem_id, percentile, timestamp, level))
+		existing_record = db_conn.execute("SELECT id FROM user_problems WHERE user_id = ? AND problem_id = ?", (user_id, problem_id)).fetchone()
+		if existing_record:
+			db_conn.execute("UPDATE user_problems SET percentile = ? WHERE id = ?", (percentile, existing_record[0]))
+		else:
+			db_conn.execute("INSERT INTO user_problems (user_id, problem_id, percentile, timestamp, level) VALUES (?, ?, ?, ?, ?)", (user_id, problem_id, percentile, timestamp, level))
 
 def add_leetcode_problem(db_conn, problem_id, title, level):
 	with db_conn:
@@ -63,8 +66,8 @@ def add_leetcode_problem(db_conn, problem_id, title, level):
 def add_daily_problems(db_conn, problems):
 	with db_conn:
 		db_conn.execute("DELETE FROM daily_problems")
-		for problem_id in problems:
-			db_conn.execute("INSERT INTO daily_problems (problem_id) VALUES (?)", (problem_id,))
+		for problem_id, level in problems:
+			db_conn.execute("INSERT INTO daily_problems (problem_id, level) VALUES (?, ?)", (problem_id, level))
 
 	db_conn.commit()
 
@@ -77,7 +80,15 @@ def get_problem_level_by_id(db_conn, problem_id):
 
 def get_daily_problems(db_conn):
 	with db_conn:
-		return [row[0] for row in db_conn.execute("SELECT problem_id FROM daily_problems").fetchall()]
+		return {row[0]: row[1] for row in db_conn.execute("SELECT level, problem_id FROM daily_problems").fetchall()}
+
+def get_daily_problems_with_difficulty(db_conn):
+	with db_conn:
+		return {row[0].lower(): row[1] for row in db_conn.execute("""
+			SELECT level, problem_id
+			FROM daily_problems
+			JOIN leetcode_problems ON daily_problems.problem_id = leetcode_problems.problem_id
+		""").fetchall()}
 
 def get_user_problem_counts(db_conn):
 	with db_conn:
@@ -111,7 +122,6 @@ def plot_leaderboard(db_conn):
 	cmap = mcolors.ListedColormap(['darkgreen', 'lightgreen', 'yellow', 'orange', 'red', 'gray'])
 	colors = [cmap(i % cmap.N) for i in range(len(usernames))]
 
-	# Use the colors to plot the bars
 	plt.figure(figsize=(8, 6))  # adjust the figure size as needed
 	plt.barh(usernames, problem_counts, color=colors)
 	plt.xlabel('Problems Solved')

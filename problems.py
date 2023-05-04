@@ -1,6 +1,7 @@
 import random
 import json
 import leetcode
+from main import levels
 
 def init_leetcode_api(leetcode_session, csrf_token):
 	configuration = leetcode.Configuration()
@@ -21,9 +22,6 @@ def get_random_unsolved_questions(api, difficulties):
 	unsolved_problems = [
 		pair for pair in api_response.stat_status_pairs if pair.status != "ac"
 	]
-
-	# For converting the difficulty level to a number, which leetcode uses
-	levels = {'Easy': 1, 'Medium': 2, 'Hard': 3}
 
 	selected_problems = {}
 	for difficulty in difficulties:

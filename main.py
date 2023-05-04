@@ -6,6 +6,9 @@ from discord.ext import commands
 import problems
 import data
 
+# For converting the difficulty level to a number, which leetcode uses
+levels = {'easy': 1, 'medium': 2, 'hard': 3}
+
 def load_config(file_path='config.json'):
 	with open(file_path, 'r') as config_file:
 		return json.load(config_file)
@@ -29,12 +32,13 @@ def run_discord_bot():
 	async def leet(ctx):
 		"""Provides the daily leetcode problems."""
 		# Get a random unsolved question for each difficulty level
-		difficulty_levels = [key.title() for key, value in config["problem_difficulties"].items() if value]
+		difficulty_levels = [key for key, value in config["problem_difficulties"].items() if value]
 		leet_problems = problems.get_random_unsolved_questions(leetcode_api, difficulty_levels)
 
 		# Add the problems to the daily problems table
-		daily_problems_ids = [problem_info['id'] for problem_info in leet_problems.values()]
-		data.add_daily_problems(db_conn, daily_problems_ids)
+		daily_problems = [(problem_info['id'], problem_info['level']) for problem_info in leet_problems.values()]
+		data.add_daily_problems(db_conn, daily_problems)
+
 
 		# Create an embed object
 		embed = discord.Embed(
@@ -66,16 +70,25 @@ def run_discord_bot():
 		message = ctx.message
 		try:
 			# Parse the message and make sure it's valid
-			_, problem_id, percentile = message.content.split()
+			_, difficulty, percentile = message.content.split()
+			difficulty = difficulty.lower()
 			percentile = float(percentile)
 			if percentile < 0 or percentile > 100:
 				raise Exception("Percentile should be between 0 and 100.")
 			percentile = round(percentile, 1)
 
+			# Convert difficulty string to a level
+			if difficulty not in levels:
+				raise Exception("Invalid difficulty. Allowed values are easy, medium, or hard.")
+			level = levels[difficulty]
+
 			# Make sure that the problem is one of today's problems
 			daily_problems = data.get_daily_problems(db_conn)
-			if int(problem_id) not in daily_problems:
-				raise Exception(f"Problem {problem_id} is not one of today's problems.")
+			if level not in daily_problems:
+				raise Exception(f"There is no {difficulty} problem today.")
+
+			# Get the problem ID for the provided difficulty
+			problem_id = daily_problems[level]
 
 			# Get the problem level and timestamp
 			level = data.get_problem_level_by_id(db_conn, problem_id)
@@ -88,7 +101,7 @@ def run_discord_bot():
 		except Exception as e:
 			print(f"Exception: {e}")
 			await message.channel.send(f"{message.author.mention} Error: {str(e)}\n\n"
-										"Usage: !solved <problem_id> <percentile>\n"
+										"Usage: !solved <difficulty> <percentile>\n"
 										"Ensure your problem_id is from today, and that your percentile is between 0 and 100.\n")
 
 	@bot.command(name='leaderboard')
