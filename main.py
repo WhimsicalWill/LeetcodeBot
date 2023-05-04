@@ -32,8 +32,14 @@ def run_discord_bot():
 		difficulty_levels = [key.title() for key, value in config["problem_difficulties"].items() if value]
 		leet_problems = problems.get_random_unsolved_questions(leetcode_api, difficulty_levels)
 
-		# Format the problem information as a message
-		message = f"{ctx.author.mention} Here are today's problems:\n\n"
+		# Create an embed object
+		embed = discord.Embed(
+			title="Today's LeetCode Problems",
+			description=f"Here are today's problems, {ctx.author.mention}:",
+			color=discord.Color.blue()
+		)
+
+		# Add fields to the embed for each problem
 		for difficulty, problem_info in leet_problems.items():
 			problem_id = problem_info['id']
 			problem_level = problem_info['level']
@@ -41,11 +47,14 @@ def run_discord_bot():
 			problem_url = problem_info['url']
 			acceptance_rate = problem_info['acceptance_rate']
 			data.add_leetcode_problem(db_conn, problem_id, problem_title, problem_level)
-			print(f"Added problem {problem_id}, of difficulty {difficulty} to database.")
-			message += f"**{difficulty} [#{problem_id}]:** **{problem_title}**, ({acceptance_rate}%)\n" \
-					   f"(<{problem_url}>)\n"
 
-		await ctx.send(message)
+			# Add a field to the embed for the current problem
+			field_name = f"{difficulty} [#{problem_id}]: {problem_title}"
+			field_value = f"[{acceptance_rate}%]({problem_url})"
+			embed.add_field(name=field_name, value=field_value, inline=False)
+
+		# Send the embed message
+		await ctx.send(embed=embed)
 
 	@bot.command(name='solved')
 	async def report_score(ctx):
@@ -53,11 +62,10 @@ def run_discord_bot():
 		message = ctx.message
 		try:
 			_, problem_id, percentile = message.content.split()
-			# TODO: refactor this to level (since level is numeric, difficulty is string)
-			difficulty = data.get_problem_difficulty_by_id(db_conn, problem_id)
+			level = data.get_problem_level_by_id(db_conn, problem_id)
 			timestamp = datetime.datetime.now().date()
 			data.add_user(db_conn, message.author.id, message.author.name)
-			data.add_user_problem(db_conn, message.author.id, int(problem_id), float(percentile), timestamp, difficulty)
+			data.add_user_problem(db_conn, message.author.id, int(problem_id), float(percentile), timestamp, level)
 			await message.channel.send(f"{message.author.mention} Successfully added problem {problem_id} with {percentile}% performance.")
 		except Exception as e:
 			print(f"Exception: {e}")

@@ -22,7 +22,7 @@ def init_db(db_name="user_problems.db"):
 		problem_id INTEGER NOT NULL,
 		percentile REAL NOT NULL,
 		timestamp DATE NOT NULL,
-		difficulty INTEGER NOT NULL,
+		level INTEGER NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES users (user_id)
 	);
 	""")
@@ -31,7 +31,7 @@ def init_db(db_name="user_problems.db"):
 	CREATE TABLE IF NOT EXISTS leetcode_problems (
 		problem_id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL,
-		difficulty TEXT NOT NULL
+		level TEXT NOT NULL
 	);
 	""")
 
@@ -43,21 +43,21 @@ def add_user(db_conn, user_id, username):
 	with db_conn:
 		db_conn.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
 
-def add_user_problem(db_conn, user_id, problem_id, percentile, timestamp, difficulty):
-	print(f"Adding user problem: {user_id}, {problem_id}, {percentile}, {timestamp}, {difficulty}")
+def add_user_problem(db_conn, user_id, problem_id, percentile, timestamp, level):
+	print(f"Adding user problem: {user_id}, {problem_id}, {percentile}, {timestamp}, {level}")
 	with db_conn:
-		db_conn.execute("INSERT INTO user_problems (user_id, problem_id, percentile, timestamp, difficulty) VALUES (?, ?, ?, ?, ?)", (user_id, problem_id, percentile, timestamp, difficulty))
+		db_conn.execute("INSERT INTO user_problems (user_id, problem_id, percentile, timestamp, level) VALUES (?, ?, ?, ?, ?)", (user_id, problem_id, percentile, timestamp, level))
 
-def get_problem_difficulty_by_id(db_conn, problem_id):
+def get_problem_level_by_id(db_conn, problem_id):
 	with db_conn:
-		result = db_conn.execute("SELECT difficulty FROM leetcode_problems WHERE problem_id = ?", (problem_id,)).fetchone()
+		result = db_conn.execute("SELECT level FROM leetcode_problems WHERE problem_id = ?", (problem_id,)).fetchone()
 	if result is None:
 		raise Exception(f"Problem {problem_id} not found in database")
 	return result[0]
 
-def add_leetcode_problem(db_conn, problem_id, title, difficulty):
+def add_leetcode_problem(db_conn, problem_id, title, level):
 	with db_conn:
-		db_conn.execute("INSERT OR IGNORE INTO leetcode_problems (problem_id, title, difficulty) VALUES (?, ?, ?)", (problem_id, title, difficulty))
+		db_conn.execute("INSERT OR IGNORE INTO leetcode_problems (problem_id, title, level) VALUES (?, ?, ?)", (problem_id, title, level))
 
 def get_user_problem_counts(db_conn):
 	with db_conn:
@@ -72,10 +72,10 @@ def get_user_problem_counts(db_conn):
 def get_user_progress(db_conn, user_id):
 	with db_conn:
 		return db_conn.execute("""
-		SELECT date(timestamp, 'start of day') as date, difficulty, COUNT(DISTINCT problem_id) as problem_count
+		SELECT date(timestamp, 'start of day') as date, level, COUNT(DISTINCT problem_id) as problem_count
 		FROM user_problems
 		WHERE user_id = ?
-		GROUP BY date, difficulty
+		GROUP BY date, level
 		ORDER BY date
 		""", (user_id,)).fetchall()
 
@@ -113,9 +113,9 @@ def plot_user_progress(db_conn, user_id):
 	counts = [0, 0, 0]
 	cum_problems = {} # date -> [easy, medium, hard] counts
 
-	for date_str, difficulty, count in user_progress:
+	for date_str, level, count in user_progress:
 		date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-		counts[difficulty - 1] += count
+		counts[level - 1] += count
 		cum_problems[date] = counts.copy()
 
 	dates = cum_problems.keys()
