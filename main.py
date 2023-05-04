@@ -49,8 +49,8 @@ def run_discord_bot():
 			data.add_leetcode_problem(db_conn, problem_id, problem_title, problem_level)
 
 			# Add a field to the embed for the current problem
-			field_name = f"{difficulty} [#{problem_id}]: {problem_title}"
-			field_value = f"[{acceptance_rate}%]({problem_url})"
+			field_name = f"{difficulty} [#{problem_id}] ({acceptance_rate}% acceptance rate)"
+			field_value = f"[{problem_title}]({problem_url})"
 			embed.add_field(name=field_name, value=field_value, inline=False)
 
 		# Send the embed message
