@@ -71,6 +71,11 @@ def add_daily_problems(db_conn, problems):
 
 	db_conn.commit()
 
+def remove_user_problem(db_conn, user_id, problem_id):
+	with db_conn:
+		db_conn.execute("DELETE FROM user_problems WHERE user_id = ? AND problem_id = ?", (user_id, problem_id))
+		db_conn.commit()
+
 def get_problem_level_by_id(db_conn, problem_id):
 	with db_conn:
 		result = db_conn.execute("SELECT level FROM leetcode_problems WHERE problem_id = ?", (problem_id,)).fetchone()
@@ -81,14 +86,6 @@ def get_problem_level_by_id(db_conn, problem_id):
 def get_daily_problems(db_conn):
 	with db_conn:
 		return {row[0]: row[1] for row in db_conn.execute("SELECT level, problem_id FROM daily_problems").fetchall()}
-
-def get_daily_problems_with_difficulty(db_conn):
-	with db_conn:
-		return {row[0].lower(): row[1] for row in db_conn.execute("""
-			SELECT level, problem_id
-			FROM daily_problems
-			JOIN leetcode_problems ON daily_problems.problem_id = leetcode_problems.problem_id
-		""").fetchall()}
 
 def get_user_problem_counts(db_conn):
 	with db_conn:

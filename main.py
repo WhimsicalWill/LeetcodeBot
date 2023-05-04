@@ -98,11 +98,37 @@ def run_discord_bot():
 			data.add_user(db_conn, message.author.id, message.author.name)
 			data.add_user_problem(db_conn, message.author.id, int(problem_id), float(percentile), timestamp, level)
 			await message.channel.send(f"{message.author.mention} Successfully added problem {problem_id} with {percentile}% performance.")
+		
 		except Exception as e:
 			print(f"Exception: {e}")
 			await message.channel.send(f"{message.author.mention} Error: {str(e)}\n\n"
 										"Usage: !solved <difficulty> <percentile>\n"
 										"Ensure your problem_id is from today, and that your percentile is between 0 and 100.\n")
+
+	@bot.command(name='remove')
+	async def remove_score(ctx):
+		message = ctx.message
+		try:
+			_, difficulty, *_ = message.content.split()
+
+			# Get today's problems
+			daily_problems = data.get_daily_problems(db_conn)
+
+			# Get the problem ID for the provided difficulty
+			level = levels[difficulty.lower()]
+			problem_id = daily_problems.get(level)
+			if not problem_id:
+				raise Exception(f"No problem found for difficulty '{difficulty}' today.")
+
+			# Remove the problem from the user_problems table
+			data.remove_user_problem(db_conn, message.author.id, problem_id)
+			await message.channel.send(f"{message.author.mention} Successfully removed problem {problem_id}.")
+
+		except Exception as e:
+			print(f"Exception: {e}")
+			await message.channel.send(f"{message.author.mention} Error: {str(e)}\n\n"
+										"Usage: !remove <difficulty>\n"
+										"Ensure your difficulty is valid and corresponds to one of today's problems.\n")
 
 	@bot.command(name='leaderboard')
 	async def leaderboard(ctx):
