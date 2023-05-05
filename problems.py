@@ -42,10 +42,6 @@ def get_random_unsolved_questions(api, difficulties):
 			problem_url = f"https://leetcode.com/problems/{random_problem.stat.question__title_slug}/"
 			acceptance_rate = round(random_problem.stat.total_acs / random_problem.stat.total_submitted * 100, 2)
 
-			print(f"Problem number: {problem_id}")
-			print(random_problem.difficulty)
-			print(random_problem.difficulty.level)
-
 			# Add the problem information to the selected_problems dictionary
 			selected_problems[difficulty] = {
 				"id": problem_id,
