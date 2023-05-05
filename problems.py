@@ -26,10 +26,10 @@ def get_random_unsolved_questions(api, difficulties):
 	for difficulty in difficulties:
 		level = levels[difficulty]
 
-		# Filter the problems you haven't solved yet for the current difficulty
+		# Filter the problems you haven't solved yet for free problems of the current difficulty
 		diff_problems = [
 			problem for problem in unsolved_problems
-			if problem.status != "ac" and problem.difficulty.level == level
+			if problem.status != "ac" and problem.difficulty.level == level and problem.paid_only == False
 		]
 
 		if diff_problems:
