@@ -34,7 +34,7 @@ def get_random_unsolved_questions(api, difficulties):
 
 		if diff_problems:
 			# Choose a random unsolved problem for the current difficulty
-			random_problem = random.choice(unsolved_problems)
+			random_problem = random.choice(diff_problems)
 
 			# Get problem details
 			problem_id = random_problem.stat.frontend_question_id
