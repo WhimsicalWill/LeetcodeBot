@@ -13,7 +13,7 @@ To use the LeetCode Discord Bot, follow the steps below:
 1. Invite the bot to your Discord server.
 2. Use the following commands to interact with the bot:
 - !leet: Generates a set of daily LeetCode problems and sends them to the channel.
-- !solved <problem_id> <percentile>: Reports your performance on a problem by providing the problem ID and your percentile (e.g., !solved 26 99.9).
+- !solved <difficulty> <percentile>: Reports your performance on a problem by providing the problem difficulty and your percentile (e.g., !solved easy 99.9).
 - !leaderboard: Displays a leaderboard of all active participants based on the number of problems solved.
 - !progress: Plots your progress over time, displaying the number of problems solved by difficulty level.
 
