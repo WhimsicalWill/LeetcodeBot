@@ -1,6 +1,6 @@
 import json
 import discord
-import datetime
+from datetime import datetime
 import os
 from discord.ext import commands
 
@@ -41,9 +41,10 @@ def run_discord_bot():
 		data.add_daily_problems(db_conn, daily_problems)
 
 
+		current_time = datetime.now()
 		# Create an embed object
 		embed = discord.Embed(
-			title="Today's LeetCode Problems",
+			title="Today's LeetCode Problems ({})".format(current_time.strftime('%m/%d/%Y')),
 			description=f"Here are today's problems, {ctx.author.mention}:",
 			color=discord.Color.blue()
 		)
