@@ -22,8 +22,8 @@ To set up your own instance of the LeetCode Discord Bot, follow these steps:
 
 1. Clone the repository and install the required dependencies:
 ```bash
-git clone https://github.com/yourusername/leetcode-discord-bot.git
-cd leetcode-discord-bot
+git clone https://github.com/WhimsicalWill/LeetcodeBot.git
+cd LeetcodeBot
 pip install -r requirements.txt
 ```
 2. Create a Discord bot and obtain its token. Follow the instructions in the Discord Developer Portal.
